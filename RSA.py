@@ -47,24 +47,27 @@ def gcd(p, q):
         return gcd(q, p % q)
 
 def encode_text(text):
-    text = toUpperCase(text)
+    #text = toUpperCase(text)
     newTextList = []
-    alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+    #alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     for i in range(len(text)):
-        idx = alphabet.index(text[i])
+        #idx = alphabet.index(text[i])
+        idx = ord(text[i])
         print("text = " , text[i], " | index = ",  idx)
-        if len(str(idx)) < 2:
-            for i in range(len(str(idx)), 2):
+        if len(str(idx)) < 3:
+            for i in range(len(str(idx)), 3):
                 idx = "0" + str(idx)
         newTextList.append(str(idx))
+    print("newTextList = ", newTextList)
     return "".join(newTextList)
 
 def decode_text(text):
-    splitted_text = splitString(text, 2)
-    alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+    splitted_text = splitString(text, 3)
+    #alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     decoded_textList = []
     for charnum in splitted_text:
-        decoded_textList.append(alphabet[int(charnum)])
+        #decoded_textList.append(alphabet[int(charnum)])
+        decoded_textList.append(chr(int(charnum)))
     return "".join(decoded_textList)
 
 def encrypt_text(text, p, q, public_key):
@@ -83,6 +86,7 @@ def encrypt_text(text, p, q, public_key):
     print("n = ", n)
     print("block_length = ", block_length)
     print("totient = ", totient)
+    print("encrypted_textList = ", encrypted_textList)
     return "".join(encrypted_textList)
 
 def decrypt_text(text, p, q, private_key):
@@ -112,12 +116,12 @@ decrypted = decrypt_text(encrypted, 47, 71, private_key(rsa_modulus(47,71),79))
 #decrypted = decrypt_text(encrypted, 961748941, 982451653, private_key(rsa_modulus(961748941, 982451653), public_key(eulers_totient(961748941,982451653))))
 print("decrypted = ", decrypted)
 
-rsa_modulus = rsa_modulus(47,71)
-# eulers_totient = eulers_totient(47,71)
-# #public_key = public_key(eulers_totient)
-# public_key = 79
-# print("n = ", rsa_modulus)
-# print("totient = ", eulers_totient)
-# print("pubkey = ", public_key)
-print(private_key(rsa_modulus, 79))
-#print((1+25*3220) % 79)
+# rsa_modulus = rsa_modulus(47,71)
+# # eulers_totient = eulers_totient(47,71)
+# # #public_key = public_key(eulers_totient)
+# # public_key = 79
+# # print("n = ", rsa_modulus)
+# # print("totient = ", eulers_totient)
+# # print("pubkey = ", public_key)
+# print(private_key(rsa_modulus, 79))
+# #print((1+25*3220) % 79)
