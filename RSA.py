@@ -1,5 +1,7 @@
 import math
 
+max_ord = 1114111
+
 def generate_rsa_modulus(p, q):
     return p * q
 
@@ -41,14 +43,16 @@ def splitString(string_to_split, split_length):
         splittedStringList.append(splittedStringPart)
     return splittedStringList
 
-def encrypt_text(text, p, q, public_key):
-    rsa_modulus = generate_rsa_modulus(p, q)
+def encrypt_text(text, public_key):
+    encryption_key, rsa_modulus = public_key
+    encryption_key = int(encryption_key)
+    rsa_modulus = int(rsa_modulus)
     encoded_textList = []
     for charIndex in range(len(text)):
         textPart = ""
         value = ord(text[charIndex])
         string_value = str(value)
-        for i in range(len(string_value), len(str(1114111))):
+        for i in range(len(string_value), len(str(max_ord))):
             string_value = "0" + string_value
         extra = False
         for index in range(len(string_value)):
@@ -60,14 +64,16 @@ def encrypt_text(text, p, q, public_key):
         encoded_textList.append(textPart)
     encrypted_textList = []
     for i in encoded_textList:
-        encrypted_textPart = str(pow(int(i), public_key, rsa_modulus))
+        encrypted_textPart = str(pow(int(i), encryption_key, rsa_modulus))
         for i in range(len(encrypted_textPart), len(str(rsa_modulus))):
             encrypted_textPart = "0" + encrypted_textPart
         encrypted_textList.append(encrypted_textPart)
     return "".join(encrypted_textList)
 
-def decrypted(text, p, q, private_key):
-    rsa_modulus = generate_rsa_modulus(p, q)
+def decrypted(text, private_key):
+    decryption_key, rsa_modulus = private_key
+    decryption_key = int(decryption_key)
+    rsa_modulus = int(rsa_modulus)
     splitText = splitString(text, len(str(rsa_modulus)))
     decoded_text = ""
     decoded_textList = []
@@ -75,9 +81,9 @@ def decrypted(text, p, q, private_key):
         decoded_splitTextPart = str(pow(int(splitTextPart), private_key, rsa_modulus))
         decoded_textList.append(decoded_splitTextPart)
     decoded_combined_textList = []
-    for i in range(0, len(decoded_textList), math.ceil(len(str(1114111)) / len(str(rsa_modulus)))):
+    for i in range(0, len(decoded_textList), math.ceil(len(str(max_ord)) / len(str(rsa_modulus)))):
         decoded_combined_textList_part = ""
-        for j in range(math.ceil(len(str(1114111)) / len(str(rsa_modulus)))):
+        for j in range(math.ceil(len(str(max_ord)) / len(str(rsa_modulus)))):
             decoded_combined_textList_part += decoded_textList[i+j]
         decoded_combined_textList.append(decoded_combined_textList_part)
     decrypted_textList = []
@@ -91,3 +97,7 @@ def decrypted(text, p, q, private_key):
 # decoded = decrypted(encoded, 47,71, 1019)
 # print(decoded)
 # print(text)
+public_key = (79, generate_rsa_modulus(47,71))
+encryption_key, rsa_modulus = public_key
+print(encryption_key)
+print(rsa_modulus)
