@@ -116,7 +116,7 @@ while True:
                 end_time = time.time()
                 process_time = end_time - start_time
                 window["output_message"].update(ciphertext)
-                window["process_time"].update(process_time)
+                window["process_time"].update(str(process_time)+" seconds")
                 print(ciphertext)
                 if values["EncryptDecryptFromFile"]:
                     fname = values["output_file"]
@@ -139,7 +139,7 @@ while True:
                 end_time = time.time()
                 process_time = end_time - start_time
                 window["output_message"].update(plaintext)
-                window["process_time"].update(process_time)
+                window["process_time"].update(str(process_time)+" seconds")
                 if values["EncryptDecryptFromFile"]:
                     fname = values["output_file"]
                     save_text_to_file(plaintext,fname)
