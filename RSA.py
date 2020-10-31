@@ -48,6 +48,7 @@ def generate_private_key(public_key):
             k += 1
 
 def generate_random_public_key(prime_number_bit):
+    prime_number_bit = int(prime_number_bit)
     public_key = None
     e = 6
     rsa_modulus = 6
@@ -69,7 +70,7 @@ def generate_and_save_random_public_key(prime_number_bit, name="rsa_public_key.p
     return public_key
 
 def generate_and_save_private_key(public_key, name="rsa_private_key.pri"):
-    private_key = generate_private_key(publickeyA)
+    private_key = generate_private_key(public_key)
     save_key(private_key, name, public=False)
     return private_key
 

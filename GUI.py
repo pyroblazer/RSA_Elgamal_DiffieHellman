@@ -2,6 +2,8 @@ import PySimpleGUI as sg
 import RSA
 import DiffieHellman
 import sys
+import time
+import os
 
 def read_text_from_file(fname):
     with open(fname, 'r') as f:
@@ -15,10 +17,14 @@ def save_text_to_file(text, fname="output_file.txt"):
 
 layout = [
     [sg.Text('Asymmetric Cryptography / Key Generator', size=(50, 1), justification='center', font=("Helvetica", 25), relief=sg.RELIEF_RIDGE)],
-        [sg.Frame(layout=[
-        [sg.Radio('RSA', default=True, key="RSA", group_id='Method')],
-        [sg.Radio('ElGamal', default=False, key="ElGamal", group_id='Method')],
-        [sg.Radio('Diffie-Hellman', default=False, key="DH", group_id='Method')],
+    [sg.Frame(layout=[
+    [sg.Radio('Keygen', default=True, key="keygen", group_id='Method')],
+    [sg.Radio('Encrypt/Decrypt', default=False, key="encrypt_decrypt", group_id='Method')],
+    ], title='Function',title_color='red', relief=sg.RELIEF_SUNKEN)],
+    [sg.Frame(layout=[
+    [sg.Radio('RSA', default=True, key="RSA", group_id='Method')],
+    [sg.Radio('ElGamal', default=False, key="ElGamal", group_id='Method')],
+    [sg.Radio('Diffie-Hellman', default=False, key="DH", group_id='Method')],
     ], title='Method',title_color='red', relief=sg.RELIEF_SUNKEN)],
     [sg.Frame(layout=[
     [sg.Checkbox('Encrypt/Decrypt From File', default=False, key="EncryptDecryptFromFile")],
@@ -27,13 +33,19 @@ layout = [
         [sg.Radio('Encrypt', default=True, key="Encrypt", group_id='Encrypt')],
         [sg.Radio('Decrypt', default=False, key="Decrypt", group_id='Encrypt')],
     ], title='Encrypt/Decrypt',title_color='red', relief=sg.RELIEF_SUNKEN)],
-    [sg.Text('Key format=(<e or d>,<public or private key>) e.g. (79,3337)', size=(45, 1), auto_size_text=False, justification='right',key="key_format",border_width=1)],
+    [sg.Text('RSA Key Generator')],
+    [sg.Text('Number of bits', size=(15, 1), auto_size_text=False, justification='right',key="rsa_keygen_bits_text"),sg.InputText(key="input_rsa_keygen_bits",disabled_readonly_background_color="grey", default_text="8")],
+    [sg.Button('Generate Public and Private Key', key="rsa_keygen")],
+    [sg.Text('Encrypt/Decrypt')],
+    [sg.Text('Key format=(<e or d>,<public or private key>) e.g. pub= (79,3337) , pri= (1019,3337)', size=(60, 1), auto_size_text=False, justification='right',key="key_format",border_width=1)],
     [sg.Text('Key', size=(15, 1), auto_size_text=False, justification='right',key="key_text"),sg.InputText(key="input_key",disabled_readonly_background_color="grey")],
     [sg.Text('Key File', size=(15, 1), auto_size_text=False, justification='right',key="key_file"),sg.InputText(key="input_key_file",disabled_readonly_background_color="grey"), sg.FileBrowse(key='input_file_browse')],
     [sg.Text('Message', size=(15, 1), auto_size_text=False, justification='right',key="input_file_text"),sg.InputText(key="input_message",disabled_readonly_background_color="grey")],
     [sg.Text('Message File', size=(15, 1), auto_size_text=False, justification='right',key="input_file_text"),sg.InputText(key="input_message_file",disabled_readonly_background_color="grey"), sg.FileBrowse(key='input_file_browse')],
     [sg.Text('Output File Name', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="output_file",disabled_readonly_background_color="grey")],
     [sg.Text('Output Message:'), sg.Text(size=(100,1), key='output_message')],
+    [sg.Text('Process Time:'), sg.Text(size=(100,1), key='process_time')],
+    [sg.Text('Output File Size:'), sg.Text(size=(100,1), key='output_file_size')],
     [sg.Text('DiffieHellman')],
     [sg.Text('n', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_n",disabled_readonly_background_color="grey")],
     [sg.Text('g', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_g",disabled_readonly_background_color="grey")],
@@ -86,6 +98,10 @@ while True:
             window["input_key"].update(disabled=False)
     if event == sg.WIN_CLOSED or event == 'Exit' or event == 'Cancel':
         break
+    elif event == "rsa_keygen":
+        prime_number_bit = values["input_rsa_keygen_bits"]
+        public_key = RSA.generate_and_save_random_public_key(prime_number_bit)
+        RSA.generate_and_save_private_key(public_key)
     elif event == 'Submit':
         if values["RSA"]:
             if values["Encrypt"]:
@@ -99,12 +115,18 @@ while True:
                     public_key = RSA.read_key(fname=values["input_key_file"],from_file=True)
                 else:
                     public_key = RSA.read_key(text=values["input_key"])
+                start_time = time.time()
                 ciphertext = RSA.encrypt_text(plaintext, public_key)
+                end_time = time.time()
+                process_time = end_time - start_time
                 window["output_message"].update(ciphertext)
+                window["process_time"].update(process_time)
                 print(ciphertext)
                 if values["EncryptDecryptFromFile"]:
                     fname = values["output_file"]
                     save_text_to_file(ciphertext,fname)
+                    window["output_file_size"].update(str(os.path.getsize(fname))+ " bytes")
+
             if values["Decrypt"]:
                 ciphertext =""
                 if values["EncryptDecryptFromFile"]:
@@ -116,13 +138,16 @@ while True:
                     private_key = RSA.read_key(fname=values["input_key_file"],from_file=True)
                 else:
                     private_key = RSA.read_key(text=values["input_key"])
+                start_time = time.time()
                 plaintext = RSA.decrypt_text(ciphertext, private_key)
+                end_time = time.time()
+                process_time = end_time - start_time
                 window["output_message"].update(plaintext)
+                window["process_time"].update(process_time)
                 if values["EncryptDecryptFromFile"]:
                     fname = values["output_file"]
-                    print(plaintext)
-                    print(fname)
                     save_text_to_file(plaintext,fname)
+                    window["output_file_size"].update(str(os.path.getsize(fname))+ " bytes")
         elif values["ElGamal"]:
             #TODO ElGamal
             pass
