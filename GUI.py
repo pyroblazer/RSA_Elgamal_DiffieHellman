@@ -18,10 +18,6 @@ def save_text_to_file(text, fname="output_file.txt"):
 layout = [
     [sg.Text('Asymmetric Cryptography / Key Generator', size=(50, 1), justification='center', font=("Helvetica", 25), relief=sg.RELIEF_RIDGE)],
     [sg.Frame(layout=[
-    [sg.Radio('Keygen', default=True, key="keygen", group_id='Method')],
-    [sg.Radio('Encrypt/Decrypt', default=False, key="encrypt_decrypt", group_id='Method')],
-    ], title='Function',title_color='red', relief=sg.RELIEF_SUNKEN)],
-    [sg.Frame(layout=[
     [sg.Radio('RSA', default=True, key="RSA", group_id='Method')],
     [sg.Radio('ElGamal', default=False, key="ElGamal", group_id='Method')],
     [sg.Radio('Diffie-Hellman', default=False, key="DH", group_id='Method')],
@@ -37,7 +33,7 @@ layout = [
     [sg.Text('Number of bits', size=(15, 1), auto_size_text=False, justification='right',key="rsa_keygen_bits_text"),sg.InputText(key="input_rsa_keygen_bits",disabled_readonly_background_color="grey", default_text="8")],
     [sg.Button('Generate Public and Private Key', key="rsa_keygen")],
     [sg.Text('Encrypt/Decrypt')],
-    [sg.Text('Key format=(<e or d>,<public or private key>) e.g. pub= (79,3337) , pri= (1019,3337)', size=(60, 1), auto_size_text=False, justification='right',key="key_format",border_width=1)],
+    [sg.Text('Key format=(<e or d>,<public or private key>) e.g. pub= (79,3337) , pri= (1019,3337)', size=(65, 1), auto_size_text=False, justification='right',key="key_format",border_width=1)],
     [sg.Text('Key', size=(15, 1), auto_size_text=False, justification='right',key="key_text"),sg.InputText(key="input_key",disabled_readonly_background_color="grey")],
     [sg.Text('Key File', size=(15, 1), auto_size_text=False, justification='right',key="key_file"),sg.InputText(key="input_key_file",disabled_readonly_background_color="grey"), sg.FileBrowse(key='input_file_browse')],
     [sg.Text('Message', size=(15, 1), auto_size_text=False, justification='right',key="input_file_text"),sg.InputText(key="input_message",disabled_readonly_background_color="grey")],
@@ -66,7 +62,7 @@ layout = [
 window = sg.Window('Asymmetric Cryptography',layout, default_element_size=(50, 1), grab_anywhere=False)
 while True:
     event, values = window.read(0)
-    print(values)
+    #print(values)
     if values["DH"]:
         window["DH_n"].update(disabled=False)
         window["DH_g"].update(disabled=False)
