@@ -1,6 +1,7 @@
 import random
 import math
 import sys
+import time
 
 def readFile(filename):
     f = open(filename, "r")
@@ -20,7 +21,7 @@ class PrivateKey(object):
         self.x = x
         self.i_num_bits = i_num_bits
     
-    def save(self, filename="elgamal_private_key.priv"):
+    def save(self, filename="elgamal_private_key.pri"):
         f = open(filename, "w")
         f.write(str(self.p) + " " + str(self.g) + " " + str(self.x) + " " + str(self.i_num_bits))
         f.close()
@@ -257,14 +258,20 @@ def test():
     #priv = keys['privateKey']
     #pub = keys['publicKey']
     priv = PrivateKey()
-    priv.read("key.pri")
+    priv.read("elgamal_private_key.pri")
     pub = PublicKey()
-    pub.read("key.pub")
+    pub.read("elgamal_public_key.pub")
     #message = readFile("example.txt")
     message = "Killer queen has already touched the doorknob"
+    start = time.time()
     cipher = encrypt(message, pub)
+    end = time.time()
+    print("encryption time in ms: ", ((end-start)*1000))
     #cipher = readFile("enc.txt")
+    start = time.time()
     plain = decrypt(cipher, priv)
+    end = time.time()
+    print("decryption time in ms: ", ((end-start)*1000))
     print(cipher)
     print(plain)
 
