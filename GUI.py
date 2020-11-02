@@ -20,11 +20,9 @@ layout = [
     [sg.Text('Asymmetric Cryptography / Key Generator', size=(50, 1), justification='center', font=("Helvetica", 25), relief=sg.RELIEF_RIDGE)],
     [sg.Frame(layout=[
     [sg.Radio('RSA', default=True, key="RSA", group_id='Method'),sg.Radio('ElGamal', default=False, key="ElGamal", group_id='Method'),sg.Radio('Diffie-Hellman', default=False, key="DH", group_id='Method')],
-    ], title='Method',title_color='red', relief=sg.RELIEF_SUNKEN)],
-    [sg.Frame(layout=[
+    ], title='Method',title_color='red', relief=sg.RELIEF_SUNKEN),sg.Frame(layout=[
     [sg.Checkbox('Encrypt/Decrypt From File', default=False, key="EncryptDecryptFromFile"),sg.Checkbox('Key From File', default=False, key="KeyFromFile")],
-    ], title='Options',title_color='red', relief=sg.RELIEF_SUNKEN)],
-    [sg.Frame(layout=[
+    ], title='Options',title_color='red', relief=sg.RELIEF_SUNKEN),sg.Frame(layout=[
         [sg.Radio('Encrypt', default=True, key="Encrypt", group_id='Encrypt'),sg.Radio('Decrypt', default=False, key="Decrypt", group_id='Encrypt')],
     ], title='Encrypt/Decrypt',title_color='red', relief=sg.RELIEF_SUNKEN)],
     [sg.Text('RSA Key Generator')],
@@ -46,10 +44,8 @@ layout = [
     [sg.Text('Process Time:'), sg.Text(size=(100,1), key='process_time')],
     [sg.Text('Output File Size:'), sg.Text(size=(100,1), key='output_file_size')],
     [sg.Text('DiffieHellman')],
-    [sg.Text('n', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_n",disabled_readonly_background_color="grey")],
-    [sg.Text('g', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_g",disabled_readonly_background_color="grey")],
-    [sg.Text('x', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_x",disabled_readonly_background_color="grey")],
-    [sg.Text('y', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_y",disabled_readonly_background_color="grey")],
+    [sg.Text('n', size=(10, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_n",disabled_readonly_background_color="grey"),sg.Text('g', size=(10, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_g",disabled_readonly_background_color="grey")],
+    [sg.Text('x', size=(10, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_x",disabled_readonly_background_color="grey"),sg.Text('y', size=(10, 1), auto_size_text=False, justification='right'),sg.InputText(key="DH_y",disabled_readonly_background_color="grey")],
     [sg.Text('Secret:'), sg.Text(size=(30,1), key='DH_secret')],
     [sg.Submit(), sg.Cancel()]
 ]
@@ -62,7 +58,7 @@ layout = [
 # private_key = RSA.read_key(text="(1019, 3337)")
 # decoded = RSA.decrypt_text(encoded, private_key)
 
-window = sg.Window('Asymmetric Cryptography',layout, default_element_size=(50, 1), grab_anywhere=False)
+window = sg.Window('Asymmetric Cryptography',layout, default_element_size=(50, 1), grab_anywhere=True)
 while True:
     event, values = window.read(0)
     #print(values)
