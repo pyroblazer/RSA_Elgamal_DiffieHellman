@@ -1,7 +1,6 @@
 import random
 import math
 import sys
-import time
 
 def readFile(filename):
     f = open(filename, "r")
@@ -15,15 +14,15 @@ def writeFile(filename, text):
     f.close()
 
 class PrivateKey(object):
-    def __init__(self, p=None, g=None, x=None, iNumBits=0):
+    def __init__(self, p=None, g=None, x=None, i_num_bits=0):
         self.p = p
         self.g = g
         self.x = x
-        self.iNumBits = iNumBits
+        self.i_num_bits = i_num_bits
     
     def save(self, filename):
         f = open(filename, "w")
-        f.write(str(self.p) + " " + str(self.g) + " " + str(self.x) + " " + str(self.iNumBits))
+        f.write(str(self.p) + " " + str(self.g) + " " + str(self.x) + " " + str(self.i_num_bits))
         f.close()
 
     def read(self, filename):
@@ -37,18 +36,18 @@ class PrivateKey(object):
         self.p = int(keys[0])
         self.g = int(keys[1])
         self.x = int(keys[2])
-        self.iNumBits = int(keys[3])
+        self.i_num_bits = int(keys[3])
 
 class PublicKey(object):
-    def __init__(self, p=None, g=None, h=None, iNumBits=0):
+    def __init__(self, p=None, g=None, h=None, i_num_bits=0):
         self.p = p
         self.g = g
         self.h = h
-        self.iNumBits = iNumBits
+        self.i_num_bits = i_num_bits
 
     def save(self, filename):
         f = open(filename, "w")
-        f.write(str(self.p) + " " + str(self.g) + " " + str(self.h) + " " + str(self.iNumBits))
+        f.write(str(self.p) + " " + str(self.g) + " " + str(self.h) + " " + str(self.i_num_bits))
         f.close()
 
     def read(self, filename):
@@ -62,7 +61,7 @@ class PublicKey(object):
         self.p = int(keys[0])
         self.g = int(keys[1])
         self.h = int(keys[2])
-        self.iNumBits = int(keys[3])
+        self.i_num_bits = int(keys[3])
 
 def gcd( a, b ):
     while b != 0:
@@ -75,9 +74,9 @@ def modexp( base, exp, modulus ):
     return pow(base, exp, modulus)
 
 #solovay-strassen primality test.  tests if num is prime
-def SS( num, iConfidence ):
+def SS( num, i_confidence ):
     #ensure confidence of t
-    for i in range(iConfidence):
+    for i in range(i_confidence):
         #choose random a between 1 and n-2
         a = random.randint( 1, num-1 )
 
@@ -150,34 +149,34 @@ def find_primitive_root( p ):
                 return g
 
 #find n bit prime
-def find_prime(iNumBits, iConfidence):
+def find_prime(i_num_bits, i_confidence):
     #keep testing until one is found
     while(1):
         #generate potential prime randomly
-        p = random.randint( 2**(iNumBits-2), 2**(iNumBits-1) )
+        p = random.randint( 2**(i_num_bits-2), 2**(i_num_bits-1) )
         #make sure it is odd
         while( p % 2 == 0 ):
-            p = random.randint(2**(iNumBits-2),2**(iNumBits-1))
+            p = random.randint(2**(i_num_bits-2),2**(i_num_bits-1))
 
         #keep doing this if the solovay-strassen test fails
-        while( not SS(p, iConfidence) ):
-            p = random.randint( 2**(iNumBits-2), 2**(iNumBits-1) )
+        while( not SS(p, i_confidence) ):
+            p = random.randint( 2**(i_num_bits-2), 2**(i_num_bits-1) )
             while( p % 2 == 0 ):
-                p = random.randint(2**(iNumBits-2), 2**(iNumBits-1))
+                p = random.randint(2**(i_num_bits-2), 2**(i_num_bits-1))
 
         #if p is prime compute p = 2*p + 1
         #if p is prime, we have succeeded; else, start over
         p = p * 2 + 1
-        if SS(p, iConfidence):
+        if SS(p, i_confidence):
                 return p
 
-def encode(sPlaintext, iNumBits):
-    byte_array = bytearray(sPlaintext, 'utf-16')
+def encode(string_plaintext, i_num_bits):
+    byte_array = bytearray(string_plaintext, 'utf-16')
     z = []
-    k = iNumBits//8
+    k = i_num_bits//8
     j = -1 * k
     num = 0
-    for i in range( len(byte_array) ):
+    for i in range(len(byte_array)):
         if i % k == 0:
             j += k
             num = 0
@@ -185,11 +184,11 @@ def encode(sPlaintext, iNumBits):
         z[j//k] += byte_array[i]*(2**(8*(i%k)))
     return z
 
-def decode(aiPlaintext, iNumBits):
+def decode(integers_plaintext, i_num_bits):
     bytes_array = []
-    k = iNumBits//8
+    k = i_num_bits//8
 
-    for num in aiPlaintext:
+    for num in integers_plaintext:
         for i in range(k):
             temp = num
             for j in range(i+1, k):
@@ -197,25 +196,23 @@ def decode(aiPlaintext, iNumBits):
             letter = temp // (2**(8*i))
             bytes_array.append(letter)
             num = num - (letter*(2**(8*i)))
+    decoded = bytearray(b for b in bytes_array).decode('utf-16')
+    return decoded
 
-    decodedText = bytearray(b for b in bytes_array).decode('utf-16')
-
-    return decodedText
-
-def generate_keys(iNumBits=256, iConfidence=32):
-    p = find_prime(iNumBits, iConfidence)
+def generate_keys(i_num_bits=256, i_confidence=32):
+    p = find_prime(i_num_bits, i_confidence)
     g = find_primitive_root(p)
     g = modexp( g, 2, p )
     x = random.randint( 1, (p - 1) // 2 )
     h = modexp( g, x, p )
 
-    publicKey = PublicKey(p, g, h, iNumBits)
-    privateKey = PrivateKey(p, g, x, iNumBits)
+    public_key = PublicKey(p, g, h, i_num_bits)
+    private_key = PrivateKey(p, g, x, i_num_bits)
 
-    return {'privateKey': privateKey, 'publicKey': publicKey}
+    return {'privateKey': private_key, 'publicKey': public_key}
 
-def encrypt(key, sPlaintext):
-    z = encode(sPlaintext, key.iNumBits)
+def encrypt(key, string_plaintext):
+    z = encode(string_plaintext, key.i_num_bits)
     cipher_pairs = []
     for i in z:
         y = random.randint( 0, key.p )
@@ -223,47 +220,47 @@ def encrypt(key, sPlaintext):
         d = (i*modexp( key.h, y, key.p)) % key.p
         cipher_pairs.append( [c, d] )
 
-    encryptedStr = ""
+    encrypted = ""
     for pair in cipher_pairs:
-        encryptedStr += str(pair[0]) + ' ' + str(pair[1]) + ' '
+        encrypted += str(pair[0]) + ' ' + str(pair[1]) + ' '
 
-    return encryptedStr
+    return encrypted
 
 def decrypt(key, cipher):
     plaintext = []
 
-    cipherArray = cipher.split()
-    if (not len(cipherArray) % 2 == 0):
-        return "Malformed Cipher Text"
-    for i in range(0, len(cipherArray), 2):
-        c = int(cipherArray[i])
-        d = int(cipherArray[i+1])
+    cipher_array = cipher.split()
+    if (not len(cipher_array) % 2 == 0):
+        return "malformed cipher text"
+    for i in range(0, len(cipher_array), 2):
+        first = int(cipher_array[i])
+        second = int(cipher_array[i+1])
 
-        s = modexp( c, key.x, key.p )
-        plain = (d*modexp( s, key.p-2, key.p)) % key.p
-        plaintext.append( plain )
+        s = modexp( first, key.x, key.p )
+        plain = (second*modexp(s, key.p-2, key.p)) % key.p
+        plaintext.append(plain)
 
-    decryptedText = decode(plaintext, key.iNumBits)
-
-    decryptedText = "".join([ch for ch in decryptedText if ch != '\x00'])
-
-    return decryptedText
+    decrypted = decode(plaintext, key.i_num_bits)
+    decrypted = "".join([char for char in decrypted if char != '\x00'])
+    return decrypted
 
 def test():
-        assert (sys.version_info >= (3,4))
-        #keys = generate_keys()
-        #priv = keys['privateKey']
-        #pub = keys['publicKey']
-        priv = PrivateKey()
-        priv.read("key.pri")
-        pub = PublicKey()
-        pub.read("key.pub")
-        message = readFile("example.txt")
-        #message = "Killer queen has already touched the doorknob"
-        cipher = encrypt(pub, message)
-        #cipher = readFile("enc.txt")
-        plain = decrypt(priv, cipher)
+    assert (sys.version_info >= (3,4))
+    #keys = generate_keys()
+    #priv = keys['privateKey']
+    #pub = keys['publicKey']
+    priv = PrivateKey()
+    priv.read("key.pri")
+    pub = PublicKey()
+    pub.read("key.pub")
+    #message = readFile("example.txt")
+    message = "Killer queen has already touched the doorknob"
+    cipher = encrypt(pub, message)
+    #cipher = readFile("enc.txt")
+    plain = decrypt(priv, cipher)
+    print(cipher)
+    print(plain)
 
-        return message == plain
+    return message == plain
 
 test()
