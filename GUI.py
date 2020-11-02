@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 import RSA
 import DiffieHellman
+import elgamal
 import sys
 import time
 import os
@@ -32,8 +33,13 @@ layout = [
     [sg.Text('RSA Key Generator')],
     [sg.Text('Number of bits', size=(15, 1), auto_size_text=False, justification='right',key="rsa_keygen_bits_text"),sg.InputText(key="input_rsa_keygen_bits",disabled_readonly_background_color="grey", default_text="8")],
     [sg.Button('Generate Public and Private Key', key="rsa_keygen")],
+    [sg.Text('ElGamal Key Generator')],
+    [sg.Button('Generate Public and Private Key', key="elgamal_keygen")],
+    [sg.Text('Number of bits', size=(15, 1), auto_size_text=False, justification='right',key="elgamal_keygen_bits_text"),sg.InputText(key="input_elgamal_keygen_bits",disabled_readonly_background_color="grey", default_text="256")],
+    [sg.Text('Confidence', size=(15, 1), auto_size_text=False, justification='right',key="elgamal_keygen_confidence_text"),sg.InputText(key="input_elgamal_keygen_confidence",disabled_readonly_background_color="grey", default_text="32")],
     [sg.Text('Encrypt/Decrypt')],
-    [sg.Text('Key format=(<e or d>,<public or private key>) e.g. pub= (79,3337) , pri= (1019,3337)', size=(65, 1), auto_size_text=False, justification='right',key="key_format",border_width=1)],
+    [sg.Text('Key format RSA=(<e or d>,<public or private key>) e.g. pub= (79,3337) , pri= (1019,3337)', size=(65, 1), auto_size_text=False, justification='right',key="key_format_rsa",border_width=1)],
+    [sg.Text('Key format ElGamal=(<the prime (p)> <square of primitive root mod prime (g)> <g^x mod p (for public); x (for private); with x is the chosen random number> <number of bits> e.g. pub= 13 2 3 256 , pri= 14 3 4 256', size=(65, 2), auto_size_text=False, justification='right',key="key_format_elgamal",border_width=1)],
     [sg.Text('Key', size=(15, 1), auto_size_text=False, justification='right',key="key_text"),sg.InputText(key="input_key",disabled_readonly_background_color="grey")],
     [sg.Text('Key File', size=(15, 1), auto_size_text=False, justification='right',key="key_file"),sg.InputText(key="input_key_file",disabled_readonly_background_color="grey"), sg.FileBrowse(key='input_file_browse')],
     [sg.Text('Message', size=(15, 1), auto_size_text=False, justification='right',key="input_file_text"),sg.InputText(key="input_message",disabled_readonly_background_color="grey")],
@@ -98,6 +104,12 @@ while True:
         prime_number_bit = values["input_rsa_keygen_bits"]
         public_key = RSA.generate_and_save_random_public_key(prime_number_bit)
         RSA.generate_and_save_private_key(public_key)
+    elif event == "elgamal_keygen":
+        keys = elgamal.generate_keys(int(values["input_elgamal_keygen_bits"]), int(values["input_elgamal_keygen_confidence"]))
+        private_key = keys['privateKey']
+        public_key = keys['publicKey']
+        private_key.save()
+        public_key.save()
     elif event == 'Submit':
         if values["RSA"]:
             if values["Encrypt"]:
@@ -145,8 +157,54 @@ while True:
                     save_text_to_file(plaintext,fname)
                     window["output_file_size"].update(str(os.path.getsize(fname))+ " bytes")
         elif values["ElGamal"]:
-            #TODO ElGamal
-            pass
+            if values["Encrypt"]:
+                plaintext=""
+                if values["EncryptDecryptFromFile"]:
+                    plaintext = elgamal.readFile(values["input_message_file"])
+                else:
+                    plaintext = values["input_message"]
+                public_key = ""
+                if values["KeyFromFile"]:
+                    public_key = elgamal.PublicKey()
+                    public_key.read(values["input_key_file"])
+                else:
+                    public_key = elgamal.PublicKey()
+                    public_key.fromText(values["input_key"])
+                start_time = time.time()
+                ciphertext = elgamal.encrypt(plaintext, public_key)
+                end_time = time.time()
+                process_time = end_time - start_time
+                window["output_message"].update(ciphertext)
+                window["process_time"].update(str(process_time)+" seconds")
+                print(ciphertext)
+                if values["EncryptDecryptFromFile"]:
+                    fname = values["output_file"]
+                    elgamal.writeFile(fname, ciphertext)
+                    window["output_file_size"].update(str(os.path.getsize(fname))+ " bytes")
+
+            if values["Decrypt"]:
+                ciphertext =""
+                if values["EncryptDecryptFromFile"]:
+                    ciphertext = elgamal.readFile(values["input_message_file"])
+                else:
+                    ciphertext = values["input_message"]
+                private_key = ""
+                if values["KeyFromFile"]:
+                    private_key = elgamal.PrivateKey()
+                    private_key.read(values["input_key_file"])
+                else:
+                    private_key = elgamal.PrivateKey()
+                    private_key.fromText(text=values["input_key"])
+                start_time = time.time()
+                plaintext = elgamal.decrypt(ciphertext, private_key)
+                end_time = time.time()
+                process_time = end_time - start_time
+                window["output_message"].update(plaintext)
+                window["process_time"].update(str(process_time)+" seconds")
+                if values["EncryptDecryptFromFile"]:
+                    fname = values["output_file"]
+                    elgamal.writeFile(fname, plaintext)
+                    window["output_file_size"].update(str(os.path.getsize(fname))+ " bytes")
         elif values["DH"]:
             n = values["DH_n"]
             g = values["DH_g"]

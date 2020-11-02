@@ -20,7 +20,7 @@ class PrivateKey(object):
         self.x = x
         self.i_num_bits = i_num_bits
     
-    def save(self, filename):
+    def save(self, filename="elgamal_private_key.priv"):
         f = open(filename, "w")
         f.write(str(self.p) + " " + str(self.g) + " " + str(self.x) + " " + str(self.i_num_bits))
         f.close()
@@ -29,6 +29,9 @@ class PrivateKey(object):
         f = open(filename, "r")
         keys = f.read()
         f.close()
+        self.fromText(keys)
+
+    def fromText(self, keys):
         keys = keys.split(" ")
         if(len(keys) < 4):
             print("Not a valid key file")
@@ -38,6 +41,7 @@ class PrivateKey(object):
         self.x = int(keys[2])
         self.i_num_bits = int(keys[3])
 
+
 class PublicKey(object):
     def __init__(self, p=None, g=None, h=None, i_num_bits=0):
         self.p = p
@@ -45,7 +49,7 @@ class PublicKey(object):
         self.h = h
         self.i_num_bits = i_num_bits
 
-    def save(self, filename):
+    def save(self, filename="elgamal_public_key.pub"):
         f = open(filename, "w")
         f.write(str(self.p) + " " + str(self.g) + " " + str(self.h) + " " + str(self.i_num_bits))
         f.close()
@@ -54,6 +58,9 @@ class PublicKey(object):
         f = open(filename, "r")
         keys = f.read()
         f.close()
+        self.fromText(keys)
+
+    def fromText(self, keys):
         keys = keys.split(" ")
         if(len(keys) < 4):
             print("Not a valid key file")
@@ -202,16 +209,16 @@ def decode(integers_plaintext, i_num_bits):
 def generate_keys(i_num_bits=256, i_confidence=32):
     p = find_prime(i_num_bits, i_confidence)
     g = find_primitive_root(p)
-    g = modexp( g, 2, p )
+    g = modexp(g, 2, p)
     x = random.randint( 1, (p - 1) // 2 )
-    h = modexp( g, x, p )
+    h = modexp(g, x, p)
 
     public_key = PublicKey(p, g, h, i_num_bits)
     private_key = PrivateKey(p, g, x, i_num_bits)
 
     return {'privateKey': private_key, 'publicKey': public_key}
 
-def encrypt(key, string_plaintext):
+def encrypt(string_plaintext, key):
     z = encode(string_plaintext, key.i_num_bits)
     cipher_pairs = []
     for i in z:
@@ -226,7 +233,7 @@ def encrypt(key, string_plaintext):
 
     return encrypted
 
-def decrypt(key, cipher):
+def decrypt(cipher, key):
     plaintext = []
 
     cipher_array = cipher.split()
@@ -255,12 +262,10 @@ def test():
     pub.read("key.pub")
     #message = readFile("example.txt")
     message = "Killer queen has already touched the doorknob"
-    cipher = encrypt(pub, message)
+    cipher = encrypt(message, pub)
     #cipher = readFile("enc.txt")
-    plain = decrypt(priv, cipher)
+    plain = decrypt(cipher, priv)
     print(cipher)
     print(plain)
 
     return message == plain
-
-test()
