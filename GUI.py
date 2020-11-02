@@ -19,16 +19,13 @@ def save_text_to_file(text, fname="output_file.txt"):
 layout = [
     [sg.Text('Asymmetric Cryptography / Key Generator', size=(50, 1), justification='center', font=("Helvetica", 25), relief=sg.RELIEF_RIDGE)],
     [sg.Frame(layout=[
-    [sg.Radio('RSA', default=True, key="RSA", group_id='Method')],
-    [sg.Radio('ElGamal', default=False, key="ElGamal", group_id='Method')],
-    [sg.Radio('Diffie-Hellman', default=False, key="DH", group_id='Method')],
+    [sg.Radio('RSA', default=True, key="RSA", group_id='Method'),sg.Radio('ElGamal', default=False, key="ElGamal", group_id='Method'),sg.Radio('Diffie-Hellman', default=False, key="DH", group_id='Method')],
     ], title='Method',title_color='red', relief=sg.RELIEF_SUNKEN)],
     [sg.Frame(layout=[
-    [sg.Checkbox('Encrypt/Decrypt From File', default=False, key="EncryptDecryptFromFile")],
-    [sg.Checkbox('Key From File', default=False, key="KeyFromFile")]], title='Options',title_color='red', relief=sg.RELIEF_SUNKEN)],
+    [sg.Checkbox('Encrypt/Decrypt From File', default=False, key="EncryptDecryptFromFile"),sg.Checkbox('Key From File', default=False, key="KeyFromFile")],
+    ], title='Options',title_color='red', relief=sg.RELIEF_SUNKEN)],
     [sg.Frame(layout=[
-        [sg.Radio('Encrypt', default=True, key="Encrypt", group_id='Encrypt')],
-        [sg.Radio('Decrypt', default=False, key="Decrypt", group_id='Encrypt')],
+        [sg.Radio('Encrypt', default=True, key="Encrypt", group_id='Encrypt'),sg.Radio('Decrypt', default=False, key="Decrypt", group_id='Encrypt')],
     ], title='Encrypt/Decrypt',title_color='red', relief=sg.RELIEF_SUNKEN)],
     [sg.Text('RSA Key Generator')],
     [sg.Text('Number of bits', size=(15, 1), auto_size_text=False, justification='right',key="rsa_keygen_bits_text"),sg.InputText(key="input_rsa_keygen_bits",disabled_readonly_background_color="grey", default_text="8")],
@@ -39,7 +36,7 @@ layout = [
     [sg.Text('Confidence', size=(15, 1), auto_size_text=False, justification='right',key="elgamal_keygen_confidence_text"),sg.InputText(key="input_elgamal_keygen_confidence",disabled_readonly_background_color="grey", default_text="32")],
     [sg.Text('Encrypt/Decrypt')],
     [sg.Text('Key format RSA=(<e or d>,<public or private key>) e.g. pub= (79,3337) , pri= (1019,3337)', size=(65, 1), auto_size_text=False, justification='right',key="key_format_rsa",border_width=1)],
-    [sg.Text('Key format ElGamal=(<the prime (p)> <square of primitive root mod prime (g)> <g^x mod p (for public); x (for private); with x is the chosen random number> <number of bits> e.g. pub= 13 2 3 256 , pri= 14 3 4 256', size=(65, 2), auto_size_text=False, justification='right',key="key_format_elgamal",border_width=1)],
+    [sg.Text('Key format ElGamal=(<the prime (p)> <square of primitive root mod prime (g)> <g^x mod p (for public); x (for private); with x is the chosen random number> <number of bits> e.g. pub= 13 2 3 256 , pri= 14 3 4 256', size=(78, 2), auto_size_text=False, justification='right',key="key_format_elgamal",border_width=1)],
     [sg.Text('Key', size=(15, 1), auto_size_text=False, justification='right',key="key_text"),sg.InputText(key="input_key",disabled_readonly_background_color="grey")],
     [sg.Text('Key File', size=(15, 1), auto_size_text=False, justification='right',key="key_file"),sg.InputText(key="input_key_file",disabled_readonly_background_color="grey"), sg.FileBrowse(key='input_file_browse')],
     [sg.Text('Message', size=(15, 1), auto_size_text=False, justification='right',key="input_file_text"),sg.InputText(key="input_message",disabled_readonly_background_color="grey")],
