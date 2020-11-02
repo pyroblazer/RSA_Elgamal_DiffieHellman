@@ -1,7 +1,6 @@
-import random
 import math
+import random
 import sys
-import time
 
 def readFile(filename):
     f = open(filename, "r")
@@ -14,45 +13,16 @@ def writeFile(filename, text):
     f.write(text)
     f.close()
 
-class PrivateKey(object):
-    def __init__(self, p=None, g=None, x=None, i_num_bits=0):
-        self.p = p
-        self.g = g
-        self.x = x
-        self.i_num_bits = i_num_bits
-    
-    def save(self, filename="elgamal_private_key.pri"):
-        f = open(filename, "w")
-        f.write(str(self.p) + " " + str(self.g) + " " + str(self.x) + " " + str(self.i_num_bits))
-        f.close()
-
-    def read(self, filename):
-        f = open(filename, "r")
-        keys = f.read()
-        f.close()
-        self.fromText(keys)
-
-    def fromText(self, keys):
-        keys = keys.split(" ")
-        if(len(keys) < 4):
-            print("Not a valid key file")
-            return
-        self.p = int(keys[0])
-        self.g = int(keys[1])
-        self.x = int(keys[2])
-        self.i_num_bits = int(keys[3])
-
-
 class PublicKey(object):
-    def __init__(self, p=None, g=None, h=None, i_num_bits=0):
+    def __init__(self, p=None, g=None, h=None, n_bits=0):
         self.p = p
         self.g = g
         self.h = h
-        self.i_num_bits = i_num_bits
+        self.n_bits = n_bits
 
     def save(self, filename="elgamal_public_key.pub"):
         f = open(filename, "w")
-        f.write(str(self.p) + " " + str(self.g) + " " + str(self.h) + " " + str(self.i_num_bits))
+        f.write(str(self.p) + " " + str(self.g) + " " + str(self.h) + " " + str(self.n_bits))
         f.close()
 
     def read(self, filename):
@@ -69,119 +39,124 @@ class PublicKey(object):
         self.p = int(keys[0])
         self.g = int(keys[1])
         self.h = int(keys[2])
-        self.i_num_bits = int(keys[3])
+        self.n_bits = int(keys[3])
 
-def gcd( a, b ):
-    while b != 0:
-        c = a % b
-        a = b
-        b = c
-    return a
+class PrivateKey(object):
+    def __init__(self, p=None, g=None, x=None, n_bits=0):
+        self.p = p
+        self.g = g
+        self.x = x
+        self.n_bits = n_bits
+    
+    def save(self, filename="elgamal_private_key.pri"):
+        f = open(filename, "w")
+        f.write(str(self.p) + " " + str(self.g) + " " + str(self.x) + " " + str(self.n_bits))
+        f.close()
 
-def modexp( base, exp, modulus ):
-    return pow(base, exp, modulus)
+    def read(self, filename):
+        f = open(filename, "r")
+        keys = f.read()
+        f.close()
+        self.fromText(keys)
 
-#solovay-strassen primality test.  tests if num is prime
-def SS( num, i_confidence ):
-    #ensure confidence of t
-    for i in range(i_confidence):
-        #choose random a between 1 and n-2
-        a = random.randint( 1, num-1 )
+    def fromText(self, keys):
+        keys = keys.split(" ")
+        if(len(keys) < 4):
+            print("Not a valid key file")
+            return
+        self.p = int(keys[0])
+        self.g = int(keys[1])
+        self.x = int(keys[2])
+        self.n_bits = int(keys[3])
 
-        #if a is not relatively prime to n, n is composite
-        if gcd( a, num ) > 1:
-            return False
-
-        #declares n prime if jacobi(a, n) is congruent to a^((n-1)/2) mod n
-        if not jacobi( a, num ) % num == modexp ( a, (num-1)//2, num ):
-            return False
-
-    #if there have been t iterations without failure, num is believed to be prime
-    return True
-
-#computes the jacobi symbol of a, n
+# finds the jacobi symbol of a, n
 def jacobi( a, n ):
     if a == 0:
         if n == 1:
             return 1
         else:
             return 0
-    #property 1 of the jacobi symbol
     elif a == -1:
         if n % 2 == 0:
             return 1
         else:
             return -1
-    #if a == 1, jacobi symbol is equal to 1
     elif a == 1:
         return 1
-    #property 4 of the jacobi symbol
     elif a == 2:
         if n % 8 == 1 or n % 8 == 7:
             return 1
         elif n % 8 == 3 or n % 8 == 5:
             return -1
-    #property of the jacobi symbol:
-    #if a = b mod n, jacobi(a, n) = jacobi( b, n )
     elif a >= n:
         return jacobi( a%n, n)
     elif a%2 == 0:
         return jacobi(2, n)*jacobi(a//2, n)
-    #law of quadratic reciprocity
-    #if a is odd and a is coprime to n
     else:
         if a % 4 == 3 and n%4 == 3:
-            return -1 * jacobi( n, a)
+            return -1 * jacobi(n, a)
         else:
-            return jacobi(n, a )
+            return jacobi(n, a)
+
+# solovay-strassen primality test to check whether or not num is prime
+def SS(num, confidence):
+    for i in range(confidence):
+        a = random.randint( 1, num-1 )
+        if gcd( a, num ) > 1:
+            return False
+
+        if not jacobi( a, num ) % num == modexp ( a, (num-1)//2, num ):
+            return False
+
+    return True
+
+# greatest common divisor of a and b
+def gcd(a, b):
+    while b != 0:
+        c = a % b
+        a = b
+        b = c
+    return a
+
+def modexp(base, exp, modulus):
+    return pow(base, exp, modulus)
 
 
-#finds a primitive root for prime p
-#this function was implemented from the algorithm described here:
-#http://modular.math.washington.edu/edu/2007/spring/ent/ent-html/node31.html
-def find_primitive_root( p ):
+# finds a primitive root for prime number p
+# algorithm described here: http://modular.math.washington.edu/edu/2007/spring/ent/ent-html/node31.html
+def find_primitive_root(p):
     if p == 2:
-            return 1
-    #the prime divisors of p-1 are 2 and (p-1)/2 because
-    #p = 2x + 1 where x is a prime
+        return 1
     p1 = 2
     p2 = (p-1) // p1
 
-    #test random g's until one is found that is a primitive root mod p
     while( 1 ):
-        g = random.randint( 2, p-1 )
-        #g is a primitive root if for all prime factors of p-1, p[i]
-        #g^((p-1)/p[i]) (mod p) is not congruent to 1
-        if not (modexp( g, (p-1)//p1, p ) == 1):
-            if not modexp( g, (p-1)//p2, p ) == 1:
+        g = random.randint(2, p-1)
+        if not (modexp(g, (p-1)//p1, p) == 1):
+            if not modexp(g, (p-1)//p2, p) == 1:
                 return g
 
-#find n bit prime
-def find_prime(i_num_bits, i_confidence):
-    #keep testing until one is found
+# finds n bit prime number
+def find_prime(n_bits, confidence):
     while(1):
-        #generate potential prime randomly
-        p = random.randint( 2**(i_num_bits-2), 2**(i_num_bits-1) )
-        #make sure it is odd
-        while( p % 2 == 0 ):
-            p = random.randint(2**(i_num_bits-2),2**(i_num_bits-1))
+        p = random.randint( 2**(n_bits-2), 2**(n_bits-1) )
+        while(p % 2 == 0):
+            p = random.randint(2**(n_bits-2),2**(n_bits-1))
 
-        #keep doing this if the solovay-strassen test fails
-        while( not SS(p, i_confidence) ):
-            p = random.randint( 2**(i_num_bits-2), 2**(i_num_bits-1) )
+        while(not SS(p, confidence)):
+            p = random.randint(2**(n_bits-2), 2**(n_bits-1))
             while( p % 2 == 0 ):
-                p = random.randint(2**(i_num_bits-2), 2**(i_num_bits-1))
+                p = random.randint(2**(n_bits-2), 2**(n_bits-1))
 
-        #if p is prime compute p = 2*p + 1
-        #if p is prime, we have succeeded; else, start over
         p = p * 2 + 1
-        if SS(p, i_confidence):
+        if SS(p, confidence):
                 return p
 
-def encode(string_plaintext, i_num_bits):
+# encode string plaintext to integer form
+def encode(string_plaintext, n_bits):
     byte_array = bytearray(string_plaintext, 'utf-16')
     z = []
-    k = i_num_bits//8
+    k = n_bits//8
     j = -1 * k
     num = 0
     for i in range(len(byte_array)):
@@ -192,9 +167,10 @@ def encode(string_plaintext, i_num_bits):
         z[j//k] += byte_array[i]*(2**(8*(i%k)))
     return z
 
-def decode(integers_plaintext, i_num_bits):
+# decode integer plaintext to string form
+def decode(integers_plaintext, n_bits):
     bytes_array = []
-    k = i_num_bits//8
+    k = n_bits//8
 
     for num in integers_plaintext:
         for i in range(k):
@@ -207,20 +183,21 @@ def decode(integers_plaintext, i_num_bits):
     decoded = bytearray(b for b in bytes_array).decode('utf-16')
     return decoded
 
-def generate_keys(i_num_bits=256, i_confidence=32):
-    p = find_prime(i_num_bits, i_confidence)
+# generate public key and private key
+def generate_keys(n_bits=256, confidence=32):
+    p = find_prime(n_bits, confidence)
     g = find_primitive_root(p)
     g = modexp(g, 2, p)
-    x = random.randint( 1, (p - 1) // 2 )
+    x = random.randint(1, (p - 1) // 2)
     h = modexp(g, x, p)
 
-    public_key = PublicKey(p, g, h, i_num_bits)
-    private_key = PrivateKey(p, g, x, i_num_bits)
+    public_key = PublicKey(p, g, h, n_bits)
+    private_key = PrivateKey(p, g, x, n_bits)
 
     return {'privateKey': private_key, 'publicKey': public_key}
 
 def encrypt(string_plaintext, key):
-    z = encode(string_plaintext, key.i_num_bits)
+    z = encode(string_plaintext, key.n_bits)
     cipher_pairs = []
     for i in z:
         y = random.randint( 0, key.p )
@@ -248,30 +225,24 @@ def decrypt(cipher, key):
         plain = (second*modexp(s, key.p-2, key.p)) % key.p
         plaintext.append(plain)
 
-    decrypted = decode(plaintext, key.i_num_bits)
+    decrypted = decode(plaintext, key.n_bits)
     decrypted = "".join([char for char in decrypted if char != '\x00'])
     return decrypted
 
 def test():
     assert (sys.version_info >= (3,4))
     #keys = generate_keys()
-    #priv = keys['privateKey']
+    #pri = keys['privateKey']
     #pub = keys['publicKey']
-    priv = PrivateKey()
-    priv.read("elgamal_private_key.pri")
+    pri = PrivateKey()
+    pri.read("elgamal_private_key.pri")
     pub = PublicKey()
     pub.read("elgamal_public_key.pub")
     #message = readFile("example.txt")
     message = "King Crimson"
-    start = time.time()
     cipher = encrypt(message, pub)
-    end = time.time()
-    print("encryption time in ms: ", ((end-start)*1000))
     #cipher = readFile("enc.txt")
-    start = time.time()
-    plain = decrypt(cipher, priv)
-    end = time.time()
-    print("decryption time in ms: ", ((end-start)*1000))
+    plain = decrypt(cipher, pri)
     print(cipher)
     print(plain)
 
