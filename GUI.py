@@ -40,7 +40,7 @@ layout = [
     [sg.Text('Message', size=(15, 1), auto_size_text=False, justification='right',key="input_file_text"),sg.InputText(key="input_message",disabled_readonly_background_color="grey")],
     [sg.Text('Message File', size=(15, 1), auto_size_text=False, justification='right',key="input_file_text"),sg.InputText(key="input_message_file",disabled_readonly_background_color="grey"), sg.FileBrowse(key='input_file_browse')],
     [sg.Text('Output File Name', size=(15, 1), auto_size_text=False, justification='right'),sg.InputText(key="output_file",disabled_readonly_background_color="grey")],
-    [sg.Text('Output Message:'), sg.Text(size=(100,1), key='output_message')],
+    [sg.Text('Output Message:'), sg.Text(size=(100,4), key='output_message')],
     [sg.Text('Process Time:'), sg.Text(size=(100,1), key='process_time')],
     [sg.Text('Output File Size:'), sg.Text(size=(100,1), key='output_file_size')],
     [sg.Text('DiffieHellman')],
@@ -60,7 +60,7 @@ layout = [
 
 window = sg.Window('Asymmetric Cryptography',layout, default_element_size=(50, 1), grab_anywhere=True)
 while True:
-    event, values = window.read(0)
+    event, values = window.read(timeout=100)
     #print(values)
     if values["DH"]:
         window["DH_n"].update(disabled=False)
@@ -187,7 +187,7 @@ while True:
                     private_key.read(values["input_key_file"])
                 else:
                     private_key = elgamal.PrivateKey()
-                    private_key.fromText(text=values["input_key"])
+                    private_key.fromText(values["input_key"])
                 start_time = time.time()
                 plaintext = elgamal.decrypt(ciphertext, private_key)
                 end_time = time.time()

@@ -262,7 +262,7 @@ def test():
     pub = PublicKey()
     pub.read("elgamal_public_key.pub")
     #message = readFile("example.txt")
-    message = "Killer queen has already touched the doorknob"
+    message = "King Crimson"
     start = time.time()
     cipher = encrypt(message, pub)
     end = time.time()
